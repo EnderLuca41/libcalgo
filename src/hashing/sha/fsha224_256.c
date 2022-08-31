@@ -30,14 +30,18 @@ static bool generate_chunk(uint8_t chunk[64], Sha256Buffer *buffer){
         return false;
     
     int space_in_chunk; //Already used space in current chunk
+    //If there are 64 or more bytes to copy
     if(!buffer->allBytedsRead && buffer->currentLen + 64 <= buffer->maxLen){
         size_t lenRead = fread(chunk, sizeof(uint8_t), 64, buffer->input);
 		buffer->currentLen += lenRead;
-        if(lenRead == 64)
+
+        if(lenRead == 64) //If there are still more bytes left
             return true;
+        
         space_in_chunk = lenRead;
 		buffer->allBytedsRead = true;
     }
+    //If there are less then 64 bytes left to copy
     else if(!buffer->allBytedsRead)
     {
         size_t lenRead = fread(chunk, sizeof(uint8_t), buffer->maxLen % 64, buffer->input);
@@ -48,7 +52,7 @@ static bool generate_chunk(uint8_t chunk[64], Sha256Buffer *buffer){
 
     chunk += space_in_chunk;
 
-    //Append 10000000 byte
+    //Append 0b10000000 byte
     if(!buffer->single_one){
         chunk[0] = 0x80;
         chunk++;
@@ -82,6 +86,7 @@ static bool generate_chunk(uint8_t chunk[64], Sha256Buffer *buffer){
     return true;
 }
 
+//Sha256 but you can specify the h constants, useful for sha224 so you not have to rewrite everyhing
 static void sha224_256(uint8_t hash[32], FILE *input, size_t len, const uint32_t Hs[8]){
     Sha256Buffer buffer;
     buffer.currentLen = 0;
