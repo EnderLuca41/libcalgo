@@ -3,7 +3,7 @@
 #include <util.h>
 #include <stdbool.h>
 
-const const uint32_t k[] = {
+const uint32_t k32[] = {
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
     0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
     0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
@@ -13,7 +13,6 @@ const const uint32_t k[] = {
     0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
     0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 };
-
 
 typedef struct {
     const uint8_t* input;
@@ -125,7 +124,7 @@ static void sha224_256(uint8_t hash[32], const void* input, size_t len, const ui
         for(int i = 0; i < 64; i++){
             const uint32_t s1 = right_rot32(e, 6) ^ right_rot32(e, 11) ^ right_rot32(e, 25);
             const uint32_t ch = (e & f) ^ (~e & g);
-            const uint32_t temp1 = h + s1 + ch + k[i] + w[i];
+            const uint32_t temp1 = h + s1 + ch + k32[i] + w[i];
             const uint32_t s0 = right_rot32(a, 2) ^ right_rot32(a, 13) ^ right_rot32(a, 22);
             const uint32_t maj = (a & b) ^ (a & c) ^ (b & c);
             const uint32_t temp2 = s0 + maj;
