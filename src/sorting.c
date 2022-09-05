@@ -79,3 +79,31 @@ static void __mergeSort(int arr[], size_t l, size_t r){
 void mergeSort(int arr[], size_t n){
     __mergeSort(arr, 0, n - 1);
 }
+
+static long long sortAfterPivot(int arr[], long long l, long long r, long long pivotIndex){
+    int pivot = arr[pivotIndex];
+    swap(r, pivotIndex, arr);
+    long long i = (l - 1);
+    for(long long int j = l; j <= r - 1; j++){
+        if(arr[j] < pivot){
+            i++;
+            swap(i, j, arr);
+        }
+    }
+    swap(i+1, r, arr);
+    return (i + 1);
+}
+
+//Uses middle element as pivot
+static void __quickSort(int arr[], long long l, long long r){
+    if(l < r){
+        long long m = (r - l) / 2 + l;
+        long long pi = sortAfterPivot(arr, l, r, m); // Position of pivot after sorting
+        __quickSort(arr, l, pi - 1);
+        __quickSort(arr, pi + 1, r);
+    }
+}
+
+void quickSort(int arr[], size_t n){
+    __quickSort(arr, 0, n - 1);
+}
