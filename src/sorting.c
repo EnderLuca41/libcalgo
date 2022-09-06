@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+#include <errno.h>
 
 static inline void swap(size_t i1, size_t i2, int *arr){
     int buf = arr[i1];
@@ -106,4 +108,54 @@ static void __quickSort(int arr[], long long l, long long r){
 
 void quickSort(int arr[], size_t n){
     __quickSort(arr, 0, n - 1);
+}
+
+//Returns true on success
+bool countingSort(int arr[], size_t n){
+    if(n == 0)
+        return false;
+    
+    //Search for biggest element
+    int max = arr[0];
+    int min = arr[0];
+    unsigned range = max - min;
+    size_t i;
+    for(i = 0; i < n; i++){
+        if(max < arr[i]) {
+            max = arr[i];
+            continue;
+        }
+        if(min > arr[i])
+            min = arr[i];
+    }
+
+    unsigned int* countArr = calloc(range, sizeof(int));
+    if(countArr == NULL)
+        return false;
+
+    //Store count of each number
+    for(i = 0; i < n; i++){
+        countArr[arr[i] - min]++;
+    }
+
+    for(i = 1; i < max; i++){
+        countArr[i] = countArr[i-1] + countArr[i];
+    }
+
+    int* result = malloc(n * sizeof(int));
+    if(result == NULL){
+        free(countArr);
+        return false;
+    }
+
+    //Look through arr and fill the content at their positions in result
+    for(i = n - 1; i >= 0; i--){
+        result[countArr[arr[i] - min] - 1] = arr[i];
+        countArr[arr[i] - min]--;
+    }
+
+    memcpy(arr, result, n);
+    free(countArr);
+    free(result);
+    return true;
 }
