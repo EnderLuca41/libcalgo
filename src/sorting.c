@@ -9,14 +9,14 @@ static inline void swap(size_t i1, size_t i2, int *arr){
     arr[i2] = buf;
 }
 
-void bubbleSort(int *arr, size_t n){
+void bubble_sort(int *arr, size_t n){
     for(size_t i = n; i != 0; i--)
         for(size_t j = 0; j + 1 < i; j++)
             if(arr[j] > arr[j+1])
                 swap(j, j+1, arr);
 }
 
-void selectionSort(int *arr, size_t n){
+void selection_sort(int *arr, size_t n){
     for(size_t i = 0; i < n; i++){
         size_t smallest = i;
         for(size_t j = i; j < n; j++)
@@ -26,7 +26,7 @@ void selectionSort(int *arr, size_t n){
     }
 }
 
-void insertionSort(int *arr, size_t n){
+void insertion_sort(int *arr, size_t n){
     for(size_t i = 1; i < n; i++)
         for(size_t j = i; j > 0; j--)
             if(arr[j-1] > arr[j])
@@ -69,7 +69,7 @@ static void merge(int arr[], size_t l, size_t m, size_t r){
     }
 }
 
-static void __mergeSort(int arr[], size_t l, size_t r){
+static void __merge_sort(int arr[], size_t l, size_t r){
     if(l < r){
         size_t m = (r - l) / 2 + l;
         __mergeSort(arr, l, m);
@@ -78,11 +78,11 @@ static void __mergeSort(int arr[], size_t l, size_t r){
     } 
 }
 
-void mergeSort(int arr[], size_t n){
+void merge_sort(int arr[], size_t n){
     __mergeSort(arr, 0, n - 1);
 }
 
-static long long sortAfterPivot(int arr[], long long l, long long r, long long pivotIndex){
+static long long sort_after_pivot(int arr[], long long l, long long r, long long pivotIndex){
     int pivot = arr[pivotIndex];
     swap(r, pivotIndex, arr);
     long long i = (l - 1);
@@ -97,7 +97,7 @@ static long long sortAfterPivot(int arr[], long long l, long long r, long long p
 }
 
 //Uses middle element as pivot
-static void __quickSort(int arr[], long long l, long long r){
+static void __quick_sort(int arr[], long long l, long long r){
     if(l < r){
         long long m = (r - l) / 2 + l;
         long long pi = sortAfterPivot(arr, l, r, m); // Position of pivot after sorting
@@ -111,7 +111,7 @@ void quickSort(int arr[], size_t n){
 }
 
 //Returns true on success
-bool countingSort(int arr[], size_t n){
+bool counting_sort(int arr[], size_t n){
     if(n == 0)
         return false;
     
