@@ -1,10 +1,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include <errno.h>
+
+#include <floatvector.h>
+
+//Constants for bucketsort
+#define START_BUCKET_SIZE 3
 
 static inline void swap(size_t i1, size_t i2, int *arr){
     int buf = arr[i1];
+    arr[i1] = arr[i2];
+    arr[i2] = buf;
+}
+
+static inline void swap_float(size_t i1, size_t i2, float *arr){
+    float buf = arr[i1];
     arr[i1] = arr[i2];
     arr[i2] = buf;
 }
@@ -31,6 +41,13 @@ void insertion_sort(int *arr, size_t n){
         for(size_t j = i; j > 0; j--)
             if(arr[j-1] > arr[j])
                 swap(j, j-1, arr);
+}
+
+void insertion_sort_float(float *arr, size_t n){
+    for(size_t i = 1; i < n; i++)
+        for(size_t j = i; j > 0; j--)
+            if(arr[j-1] > arr[j])
+                swap_float(j, j-1, arr);
 }
 
 static void merge(int arr[], size_t l, size_t m, size_t r){
@@ -72,14 +89,14 @@ static void merge(int arr[], size_t l, size_t m, size_t r){
 static void __merge_sort(int arr[], size_t l, size_t r){
     if(l < r){
         size_t m = (r - l) / 2 + l;
-        __mergeSort(arr, l, m);
-        __mergeSort(arr, m+1, r);
+        __merge_sort(arr, l, m);
+        __merge_sort(arr, m+1, r);
         merge(arr, l, m ,r);
     } 
 }
 
 void merge_sort(int arr[], size_t n){
-    __mergeSort(arr, 0, n - 1);
+    __merge_sort(arr, 0, n - 1);
 }
 
 static long long sort_after_pivot(int arr[], long long l, long long r, long long pivotIndex){
@@ -100,14 +117,14 @@ static long long sort_after_pivot(int arr[], long long l, long long r, long long
 static void __quick_sort(int arr[], long long l, long long r){
     if(l < r){
         long long m = (r - l) / 2 + l;
-        long long pi = sortAfterPivot(arr, l, r, m); // Position of pivot after sorting
-        __quickSort(arr, l, pi - 1);
-        __quickSort(arr, pi + 1, r);
+        long long pi = sort_after_pivot(arr, l, r, m); // Position of pivot after sorting
+        __quick_sort(arr, l, pi - 1);
+        __quick_sort(arr, pi + 1, r);
     }
 }
 
-void quickSort(int arr[], size_t n){
-    __quickSort(arr, 0, n - 1);
+void quick_sort(int arr[], size_t n){
+    __quick_sort(arr, 0, n - 1);
 }
 
 //Returns true on success
@@ -157,5 +174,65 @@ bool counting_sort(int arr[], size_t n){
     memcpy(arr, result, n);
     free(countArr);
     free(result);
+    return true;
+}
+
+void deallocate_buckets(FloatVector **buckets, size_t n){
+    for(int i = 0; i < n; i++){
+        float_vector_destroy(buckets[i]);
+    }
+}
+
+
+
+bool bucket_sort(float arr[], size_t n){
+    float max = arr[0];
+    float min = arr[0];
+    for(int i = 0; i < n; i++){
+        if(arr[i] > max){
+            max = arr[i];
+            continue;
+        }
+        if(arr[i] < min)
+            min = arr[i];
+    }
+    
+    int bucketAmount = n / 2;
+    float range = (max - min) / bucketAmount;
+    
+    FloatVector **buckets = malloc(bucketAmount * sizeof(FloatVector *));
+    if(buckets == NULL)
+        return false; 
+
+    //Create buckets
+    for(int i = 0; i < bucketAmount; i++){
+        buckets[i] = float_vector_init(-1, START_BUCKET_SIZE);
+        //If init fails one time all other buckets get deallocated plus the array
+        if(buckets[i] == NULL){
+            deallocate_buckets(buckets, i);
+            free(buckets);
+            return false;
+        }
+    }
+
+    for(int i = 0; i < n; i++){
+        float diff = (arr[i] - min) / range - ((int) ((arr[i] - min) / range));
+        if(diff == 0 && arr[i] != min)
+            float_vector_add(buckets[(int) ((arr[i] - min) / range) - 1], arr[i]);
+        else
+            float_vector_add(buckets[(int) ((arr[i] - min) / range)], arr[i]);
+    }
+
+    //Sort anc concat the buckets
+    for(int i = 0; i < bucketAmount; i++){
+        insertion_sort_float(buckets[i]->arr, buckets[i]->size);
+        
+        //Copy into arr
+        for(int j = 0; j < buckets[i]->size; j++){
+            arr[0] = buckets[i]->arr[j];
+            arr++;
+        }
+    }
+
     return true;
 }

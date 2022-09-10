@@ -79,13 +79,13 @@ int float_vector_remove(FloatVector *vector, int32_t amount){
  * Returns NULL on failure.
  */
 FloatVector * float_vector_init(int32_t maxSize, int32_t startSize){
-    if(startSize > maxSize)
-        return NULL;
-
     if(maxSize < 0)
         maxSize = INT32_MAX;
     if(startSize < 0)
         startSize = DEFAULT_START_SIZE;
+
+    if(startSize > maxSize)
+        return NULL;
     
     FloatVector *vector = malloc(sizeof(FloatVector));
     if(vector == NULL)
