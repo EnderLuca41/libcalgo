@@ -6,7 +6,7 @@ set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
-add_library(libcalgo SHARED src/HashMap.c src/hashing/fnv.c src/hashing/sha/sha224_256.c src/hashing/sha/sha384_512.c src/hashing/sha/fsha224_256.c src/util.c src/sorting.c)
+add_library(libcalgo SHARED src/HashMap.c src/hashing/fnv.c src/hashing/sha/sha224_256.c src/hashing/sha/sha384_512.c src/hashing/sha/fsha224_256.c src/util.c src/sorting.c src/FloatVector.c)
 target_link_libraries(libcalgo m)
 
 install(TARGETS libcalgo DESTINATION /usr/lib)
