@@ -1,11 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <math.h>
 
 #include <floatvector.h>
-
-//Constants for bucketsort
-#define START_BUCKET_SIZE 3
 
 static inline void swap(size_t i1, size_t i2, int *arr){
     int buf = arr[i1];
@@ -197,7 +195,7 @@ bool bucket_sort(float arr[], size_t n){
             min = arr[i];
     }
     
-    int bucketAmount = n / 2;
+    int bucketAmount = (int) sqrt(n);
     float range = (max - min) / bucketAmount;
     
     FloatVector **buckets = malloc(bucketAmount * sizeof(FloatVector *));
@@ -206,7 +204,7 @@ bool bucket_sort(float arr[], size_t n){
 
     //Create buckets
     for(int i = 0; i < bucketAmount; i++){
-        buckets[i] = float_vector_init(-1, START_BUCKET_SIZE);
+        buckets[i] = float_vector_init(-1, bucketAmount);
         //If init fails one time all other buckets get deallocated plus the array
         if(buckets[i] == NULL){
             deallocate_buckets(buckets, i);
@@ -223,7 +221,7 @@ bool bucket_sort(float arr[], size_t n){
             float_vector_add(buckets[(int) ((arr[i] - min) / range)], arr[i]);
     }
 
-    //Sort anc concat the buckets
+    //Sort and concat the buckets
     for(int i = 0; i < bucketAmount; i++){
         insertion_sort_float(buckets[i]->arr, buckets[i]->size);
         
