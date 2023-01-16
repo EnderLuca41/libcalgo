@@ -182,7 +182,7 @@ void deallocate_buckets(FloatVector **buckets, size_t n){
 }
 
 
-
+//Uses float array, because other than counting sort bucket sort can use floating point values
 bool bucket_sort(float arr[], size_t n){
     float max = arr[0];
     float min = arr[0];
@@ -196,15 +196,15 @@ bool bucket_sort(float arr[], size_t n){
     }
     
     int bucketAmount = (int) sqrt(n);
-    float range = (max - min) / bucketAmount;
+    float range = (max - min) / bucketAmount; //The range of every bucket
     
     FloatVector **buckets = malloc(bucketAmount * sizeof(FloatVector *));
     if(buckets == NULL)
         return false; 
-
+    
     //Create buckets
     for(int i = 0; i < bucketAmount; i++){
-        buckets[i] = float_vector_init(-1, bucketAmount);
+        buckets[i] = float_vector_init(n, bucketAmount);
         //If init fails one time all other buckets get deallocated plus the array
         if(buckets[i] == NULL){
             deallocate_buckets(buckets, i);
@@ -213,6 +213,7 @@ bool bucket_sort(float arr[], size_t n){
         }
     }
 
+    //Loop through arr and insert values into buckets
     for(int i = 0; i < n; i++){
         float diff = (arr[i] - min) / range - ((int) ((arr[i] - min) / range));
         if(diff == 0 && arr[i] != min)
@@ -232,5 +233,7 @@ bool bucket_sort(float arr[], size_t n){
         }
     }
 
+    deallocate_buckets(buckets, bucketAmount);
+    free(buckets);
     return true;
 }
