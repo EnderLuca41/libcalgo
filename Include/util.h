@@ -12,6 +12,8 @@ extern "C"{
 #endif
     inline uint32_t right_rot32(uint32_t x, uint8_t n) { return (x >> n) | (x << (32-n)); }
     inline uint64_t right_rot64(uint64_t x, uint8_t n) { return (x >> n) | (x << (64-n)); }
+
+    inline uint32_t left_rot32(uint32_t x, uint8_t n) {  return (x << n) | (x >> (32-n)); }
 #ifdef __cplusplus
 }
 #endif
