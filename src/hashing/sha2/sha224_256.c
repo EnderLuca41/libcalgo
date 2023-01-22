@@ -20,35 +20,35 @@ typedef struct {
     uint64_t currentLen;
     bool done;
     bool single_one; //If single one is already appended
-} Sha256Buffer;
+} Sha256Context;
 
 //Generates a 512 bit large chunk for the sha algorithm
-static bool generate_chunk(uint8_t chunk[64], Sha256Buffer *buffer){
-    if(buffer->done == true)
+static bool generate_chunk(uint8_t chunk[64], Sha256Context *context){
+    if(context->done == true)
         return false;
 
     //When there is still 64 bytes or more of the input left,
     //They get simply copied into chunk
-    if(buffer->currentLen >= 64){
-        memcpy(chunk, buffer->input, 64);
-        buffer->input += 64;
-        buffer->currentLen -= 64;
+    if(context->currentLen >= 64){
+        memcpy(chunk, context->input, 64);
+        context->input += 64;
+        context->currentLen -= 64;
         return true;        
     }
 
     //When there is 63 bytes of data or less left they get all copied into chunk
-    memcpy(chunk, buffer->input, buffer->currentLen);
-    size_t space_in_chunk = buffer->currentLen;
+    memcpy(chunk, context->input, context->currentLen);
+    size_t space_in_chunk = context->currentLen;
     chunk += space_in_chunk;
-    buffer->input += buffer->currentLen;
-    buffer->currentLen -= buffer->currentLen;
+    context->input += context->currentLen;
+    context->currentLen -= context->currentLen;
 
      //Append single one
-    if(!buffer->single_one) {
+    if(!context->single_one) {
         chunk[0] = 128;
         chunk++;
         space_in_chunk++;
-        buffer->single_one = true;
+        context->single_one = true;
     }
 
     //If there is not enough room in the chunk (8 bytes) for the length of the input,
@@ -67,31 +67,31 @@ static bool generate_chunk(uint8_t chunk[64], Sha256Buffer *buffer){
     chunk += 64 - space_in_chunk - 8;
     
     //Copy length endian indpendent
-	unsigned long len = buffer->inputLen * 8;
+	unsigned long len = context->inputLen * 8;
 	uint8_t shift = 56;
 	for(uint8_t i = 0; i < 8; i++){
 		chunk[i] = (uint8_t) (len >> shift);
 		shift -= 8;
 	}
     
-    buffer->done = true;
+    context->done = true;
     return true;
 }
 
 //Sha256 but you can specify the h constants, useful for sha224 so you not have to rewrite everyhing
 static void sha224_256(uint8_t hash[32], const void* input, size_t len, const uint32_t Hs[8]){
-    Sha256Buffer buffer;
-    buffer.currentLen = len;
-    buffer.done = false;
-    buffer.input = input;
-    buffer.inputLen = len;
-    buffer.single_one = false;
+    Sha256Context context;
+    context.currentLen = len;
+    context.done = false;
+    context.input = input;
+    context.inputLen = len;
+    context.single_one = false;
 
     uint32_t hArr[8];
     memcpy(hArr, Hs, sizeof(uint32_t) * 8);
     
     uint8_t chunk[64];
-    while (generate_chunk(chunk, &buffer)) {
+    while (generate_chunk(chunk, &context)) {
         uint32_t w[64];
         uint32_t a,b,c,d,e,f,g,h;
         

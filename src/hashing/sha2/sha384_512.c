@@ -55,35 +55,35 @@ typedef struct
 	uint64_t currentLen;
 	bool done;
 	bool single_one;
-} Sha512Buffer;
+} Sha512Context;
 
 //Generates a 1024 bit large chunk for the sha algorithm
-static bool generate_chunk(uint8_t chunk[128], Sha512Buffer *buffer){
-	if(buffer->done)
+static bool generate_chunk(uint8_t chunk[128], Sha512Context *context){
+	if(context->done)
 		return false;
 
 	//When there is still 128 bytes or more of the input left,
     //128 bytes get simply copied into chunk
-	if(buffer->currentLen >= 128){
-		memcpy(chunk, buffer->input, 128);
-		buffer->input += 128;
-		buffer->currentLen -= 128;
+	if(context->currentLen >= 128){
+		memcpy(chunk, context->input, 128);
+		context->input += 128;
+		context->currentLen -= 128;
 		return true;
 	}
 
     //When there is 127 bytes of data or less left they get all copied into chunk
-    memcpy(chunk, buffer->input, buffer->currentLen);
-    size_t space_in_chunk = buffer->currentLen;
+    memcpy(chunk, context->input, context->currentLen);
+    size_t space_in_chunk = context->currentLen;
     chunk += space_in_chunk;
-    buffer->input += buffer->currentLen;
-    buffer->currentLen -= buffer->currentLen;
+    context->input += context->currentLen;
+    context->currentLen -= context->currentLen;
 
      //Append single one
-    if(!buffer->single_one) {
+    if(!context->single_one) {
         chunk[0] = 128;
         chunk++;
         space_in_chunk++;
-        buffer->single_one = true;
+        context->single_one = true;
     }
 
 	//If there is not enough room in the chunk (16 bytes) for the length of the input,
@@ -103,14 +103,14 @@ static bool generate_chunk(uint8_t chunk[128], Sha512Buffer *buffer){
     chunk += 128 - space_in_chunk - 8;
 
 	//Copy length endian indpendent
-	unsigned long len = buffer->inputLen * 8;
+	unsigned long len = context->inputLen * 8;
 	uint8_t shift = 56;
 	for(uint8_t i = 0; i < 8; i++){
 		chunk[i] = (uint8_t) (len >> shift);
 		shift -= 8;
 	}
     
-    buffer->done = true;
+    context->done = true;
     return true;
 }
 
@@ -118,15 +118,16 @@ static void sha384_512(uint8_t hash[64], const void *input, size_t len, const ui
 	uint64_t hArr[8];
 	memcpy(hArr, Hs, sizeof(uint64_t) * 8);
 
-	Sha512Buffer buffer;
-	buffer.currentLen = len;
-	buffer.inputLen = len;
-	buffer.input = input;
-	buffer.done = false;
-	buffer.single_one = false;
+	Sha512Context
+ context;
+	context.currentLen = len;
+	context.inputLen = len;
+	context.input = input;
+	context.done = false;
+	context.single_one = false;
 
 	uint8_t chunk[128]; 
-	while(generate_chunk(chunk, &buffer)){
+	while(generate_chunk(chunk, &context)){
 		uint64_t w[80];
 		uint64_t a,b,c,d,e,f,g,h;
 		uint8_t i;

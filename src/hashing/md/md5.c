@@ -39,35 +39,35 @@ typedef struct {
     uint64_t currentLen;
     bool done;
     bool single_one; //If single one is already appended
-} Md5Buffer;
+} Md5Context;
 
 //Generates a 512 bit large chunk for the md5 algorithm
-static bool generate_chunk(uint8_t chunk[64], Md5Buffer *buffer){
-    if(buffer->done == true)
+static bool generate_chunk(uint8_t chunk[64], Md5Context *context){
+    if(context->done == true)
         return false;
 
     //When there is still 64 bytes or more of the input left,
     //They get simply copied into chunk
-    if(buffer->currentLen >= 64){
-        memcpy(chunk, buffer->input, 64);
-        buffer->input += 64;
-        buffer->currentLen -= 64;
+    if(context->currentLen >= 64){
+        memcpy(chunk, context->input, 64);
+        context->input += 64;
+        context->currentLen -= 64;
         return true;        
     }
 
     //When there is 63 bytes of data or less left they get all copied into chunk
-    memcpy(chunk, buffer->input, buffer->currentLen);
-    size_t space_in_chunk = buffer->currentLen;
+    memcpy(chunk, context->input, context->currentLen);
+    size_t space_in_chunk = context->currentLen;
     chunk += space_in_chunk;
-    buffer->input += buffer->currentLen;
-    buffer->currentLen -= buffer->currentLen;
+    context->input += context->currentLen;
+    context->currentLen -= context->currentLen;
 
      //Append single one
-    if(!buffer->single_one) {
+    if(!context->single_one) {
         chunk[0] = 128;
         chunk++;
         space_in_chunk++;
-        buffer->single_one = true;
+        context->single_one = true;
     }
     /*
     * If there is not enough room in the chunk (8 bytes) for the length of the input,
@@ -87,10 +87,10 @@ static bool generate_chunk(uint8_t chunk[64], Md5Buffer *buffer){
     chunk += 64 - space_in_chunk - 8;
     
     //Copy length in little endian
-    uint64_t inputLen = buffer->inputLen * 8;
+    uint64_t inputLen = context->inputLen * 8;
     memcpy(chunk, &inputLen, 8);
     
-    buffer->done = true;
+    context->done = true;
     return true;
 }
 
@@ -102,16 +102,16 @@ void md5(uint8_t hash[16], const void *input, size_t len){
     uint32_t c0 = 0x98badcfe;   
     uint32_t d0 = 0x10325476; 
 
-    Md5Buffer buffer;
-    buffer.currentLen = len;
-    buffer.inputLen = len;
-    buffer.input = input;
-    buffer.done = false;
-    buffer.single_one = false;
+    Md5Context context;
+    context.currentLen = len;
+    context.inputLen = len;
+    context.input = input;
+    context.done = false;
+    context.single_one = false;
 
     uint8_t chunk[64];
 
-    while(generate_chunk(chunk, &buffer)){
+    while(generate_chunk(chunk, &context)){
         //The 512 bit Chunk but as uin32_t's
         uint32_t M[16];
         memcpy(M, chunk, sizeof chunk);
