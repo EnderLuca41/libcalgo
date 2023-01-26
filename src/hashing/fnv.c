@@ -7,7 +7,7 @@
 unsigned int fnv1a_32(char* arr, int n){
     unsigned int hash = FNV_OFFSET_BASIS32;
 
-     for(int i = 0; i < n; i++){
+    for(int i = 0; i < n; i++){
         hash = hash ^ arr[i];
         hash *= FNV_PRIME32;
     }
@@ -29,7 +29,7 @@ unsigned long fnv1a_64(char* arr, int n){
 unsigned int fnv1_32(char* arr, int n){
     unsigned int hash = FNV_OFFSET_BASIS32;
 
-     for(int i = 0; i < n; i++){
+    for(int i = 0; i < n; i++){
         hash *= FNV_PRIME32;
         hash = hash ^ arr[i];
     }
@@ -51,7 +51,7 @@ unsigned long fnv1_64(char* arr, int n){
 unsigned int Ffnv0_32(char* arr, int n){
     unsigned int hash = 0;
 
-     for(int i = 0; i < n; i++){
+    for(int i = 0; i < n; i++){
         hash *= FNV_PRIME32;
         hash = hash ^ arr[i];
     }
