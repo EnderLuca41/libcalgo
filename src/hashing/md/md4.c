@@ -158,21 +158,21 @@ void md4(uint8_t hash[16], const void *input, size_t len){
         GG(B, C, D, A, M[15], S24);
 
         //Third Round
-        HH(A, B, C, D, M[ 0], S31);
-        HH(D, A, B, C, M[ 8], S32);
-        HH(C, D, A, B, M[ 4], S33);
+        HH(A, B, C, D, M[0], S31);
+        HH(D, A, B, C, M[8], S32);
+        HH(C, D, A, B, M[4], S33);
         HH(B, C, D, A, M[12], S34);
-        HH(A, B, C, D, M[ 2], S31);
+        HH(A, B, C, D, M[2], S31);
         HH(D, A, B, C, M[10], S32);
-        HH(C, D, A, B, M[ 6], S33);
+        HH(C, D, A, B, M[6], S33);
         HH(B, C, D, A, M[14], S34);
-        HH(A, B, C, D, M[ 1], S31);
-        HH(D, A, B, C, M[ 9], S32);
-        HH(C, D, A, B, M[ 5], S33);
+        HH(A, B, C, D, M[1], S31);
+        HH(D, A, B, C, M[9], S32);
+        HH(C, D, A, B, M[5], S33);
         HH(B, C, D, A, M[13], S34);
-        HH(A, B, C, D, M[ 3], S31);
+        HH(A, B, C, D, M[3], S31);
         HH(D, A, B, C, M[11], S32);
-        HH(C, D, A, B, M[ 7], S33);
+        HH(C, D, A, B, M[7], S33);
         HH(B, C, D, A, M[15], S34);
 
         a0 += A;
