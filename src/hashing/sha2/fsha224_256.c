@@ -15,39 +15,39 @@ typedef struct {
 	bool allBytedsRead;
 } Sha256Context;
 
-static bool generate_chunk(uint8_t chunk[64], Sha256Context *buffer){
-    if(buffer->done)
+static bool generate_chunk(uint8_t chunk[64], Sha256Context *context){
+    if(context->done)
         return false;
     
     int space_in_chunk; //Already used space in current chunk
     //If there are 64 or more bytes to copy
-    if(!buffer->allBytedsRead && buffer->currentLen + 64 <= buffer->maxLen){
-        size_t lenRead = fread(chunk, sizeof(uint8_t), 64, buffer->input);
-		buffer->currentLen += lenRead;
+    if(!context->allBytedsRead && context->currentLen + 64 <= context->maxLen){
+        size_t lenRead = fread(chunk, sizeof(uint8_t), 64, context->input);
+		context->currentLen += lenRead;
 
         if(lenRead == 64) //If there are still more bytes left
             return true;
         
         space_in_chunk = lenRead;
-		buffer->allBytedsRead = true;
+		context->allBytedsRead = true;
     }
     //If there are less then 64 bytes left to copy
-    else if(!buffer->allBytedsRead)
+    else if(!context->allBytedsRead)
     {
-        size_t lenRead = fread(chunk, sizeof(uint8_t), buffer->maxLen % 64, buffer->input);
+        size_t lenRead = fread(chunk, sizeof(uint8_t), context->maxLen % 64, context->input);
         space_in_chunk = lenRead;
-        buffer->currentLen += lenRead;
-		buffer->allBytedsRead = true;
+        context->currentLen += lenRead;
+		context->allBytedsRead = true;
     }
 
     chunk += space_in_chunk;
 
     //Append 0b10000000 byte
-    if(!buffer->single_one){
+    if(!context->single_one){
         chunk[0] = 0x80;
         chunk++;
         space_in_chunk++;
-        buffer->single_one = true;
+        context->single_one = true;
     }
 
     //If there is not enough room in the chunk (8 bytes) for the length of the input,
@@ -65,32 +65,32 @@ static bool generate_chunk(uint8_t chunk[64], Sha256Context *buffer){
     chunk += 64 - space_in_chunk - 8;
     
     //Copy length endian indpendent
-	unsigned long len = buffer->currentLen * 8;
+	unsigned long len = context->currentLen * 8;
 	uint8_t shift = 56;
 	for(uint8_t i = 0; i < 8; i++){
 		chunk[i] = (uint8_t) (len >> shift);
 		shift -= 8;
 	}
     
-    buffer->done = true;
+    context->done = true;
     return true;
 }
 
 //Sha256 but you can specify the h constants, useful for sha224 so you not have to rewrite everything
 static void fsha224_256(uint8_t hash[32], FILE *input, size_t len, const uint32_t Hs[8]){
-    Sha256Context buffer;
-    buffer.currentLen = 0;
-    buffer.done = false;
-    buffer.input = input;
-    buffer.maxLen = len;
-    buffer.single_one = false;
-    buffer.allBytedsRead = false;
+    Sha256Context context;
+    context.currentLen = 0;
+    context.done = false;
+    context.input = input;
+    context.maxLen = len;
+    context.single_one = false;
+    context.allBytedsRead = false;
 
     uint32_t hArr[8];
     memcpy(hArr, Hs, sizeof(uint32_t) * 8);
     
     uint8_t chunk[64];
-    while (generate_chunk(chunk, &buffer)) {
+    while (generate_chunk(chunk, &context)) {
         uint32_t w[64];
         uint32_t a,b,c,d,e,f,g,h;
         
