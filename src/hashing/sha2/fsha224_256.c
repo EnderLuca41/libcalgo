@@ -13,9 +13,9 @@ typedef struct {
 	bool single_one;
 	bool done;
 	bool allBytedsRead;
-} Sha256Buffer;
+} Sha256Context;
 
-static bool generate_chunk(uint8_t chunk[64], Sha256Buffer *buffer){
+static bool generate_chunk(uint8_t chunk[64], Sha256Context *buffer){
     if(buffer->done)
         return false;
     
@@ -78,7 +78,7 @@ static bool generate_chunk(uint8_t chunk[64], Sha256Buffer *buffer){
 
 //Sha256 but you can specify the h constants, useful for sha224 so you not have to rewrite everything
 static void fsha224_256(uint8_t hash[32], FILE *input, size_t len, const uint32_t Hs[8]){
-    Sha256Buffer buffer;
+    Sha256Context buffer;
     buffer.currentLen = 0;
     buffer.done = false;
     buffer.input = input;
