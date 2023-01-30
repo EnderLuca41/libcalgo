@@ -76,7 +76,7 @@ static bool generate_chunk(uint8_t chunk[64], Sha256Buffer *buffer){
     return true;
 }
 
-//Sha256 but you can specify the h constants, useful for sha224 so you not have to rewrite everyhing
+//Sha256 but you can specify the h constants, useful for sha224 so you not have to rewrite everything
 static void fsha224_256(uint8_t hash[32], FILE *input, size_t len, const uint32_t Hs[8]){
     Sha256Buffer buffer;
     buffer.currentLen = 0;
