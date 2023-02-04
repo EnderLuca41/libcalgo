@@ -1,5 +1,6 @@
 # calgolib
-Simple C algorithm library
+This just a collection of different algorithms that I wanted to write,
+Use it for whatever you want (for example as a refrence), but be aware of [the license](LICENSE).
 
 ## Compatibility
 All Algorthms are written to run on a Little-Endian x86 or x86-64,
