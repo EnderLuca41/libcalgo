@@ -8,8 +8,9 @@
  * -2 if if a character from key or data was not alphabet,
  * and -3 if the polybiusSize > 9
  */
-int nihilist_cipher_encrypt(unsigned char *data, size_t dataLen,  const unsigned char *key, const unsigned char *alphabet,  uint32_t polybiusSize){
-    size_t alphabetLen = strlen(alphabet);
+int nihilist_cipher_encrypt(unsigned char *data, size_t dataLen,  
+                            const unsigned char *key, const unsigned char *alphabet,
+                             size_t alphabetLen, uint32_t polybiusSize){
     if(alphabetLen > polybiusSize * polybiusSize)
         return -1;
     if(polybiusSize > 9)
@@ -68,9 +69,9 @@ int nihilist_cipher_encrypt(unsigned char *data, size_t dataLen,  const unsigned
  * -2 if if a character from key was not in alphabet,
  * and -3 if the polybiusSize > 9
  */
-int nihilist_cipher_decrypt(unsigned char *data, size_t dataLen, const unsigned char *key, 
-                            const unsigned char *alphabet, uint32_t polybiusSize){
-    size_t alphabetLen = strlen(alphabet);
+int nihilist_cipher_decrypt(unsigned char *data, size_t dataLen, 
+                            const unsigned char *key, const unsigned char *alphabet, 
+                            size_t alphabetLen,uint32_t polybiusSize){
     if(alphabetLen > polybiusSize * polybiusSize)
         return -1;
     if(polybiusSize > 9)
