@@ -1,4 +1,4 @@
-# calgolib
+# libcalgo
 This just a collection of different algorithms that I wanted to write,
 Use it for whatever you want (for example as a refrence), but be aware of [the license](LICENSE).
 
