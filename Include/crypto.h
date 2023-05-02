@@ -8,7 +8,15 @@ typedef enum{
      * 03 06 11
      * 04 05 12
      */
-    ZigZagDownUp
+    ZigZagDownUp,
+
+    /*
+     * 04 05 12
+     * 03 06 11
+     * 02 07 10
+     * 01 08 09
+     */
+    ZigZagUpDown
 } Route;
 
 #ifdef __cplusplus
