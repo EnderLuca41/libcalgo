@@ -14,10 +14,10 @@ typedef struct {
     uint8_t __bshift;
     const uint32_t *__bytehash;
 } Buzhash;
-/*
+
 #ifdef __cplusplus
 extern "C" {
-#endif*/
+#endif
 
 //Get the current hash
 uint32_t buzhash_get(Buzhash *bh);
@@ -29,8 +29,8 @@ Buzhash * buzhash_create(uint32_t blockSize, uint32_t *bytehash);
 void buzhash_destoy(Buzhash *bh);
 //Update the hash with new bytes
 void buzhash_write(Buzhash *bh, const uint8_t *input, size_t len);
-/*
+
 #ifdef __cplusplus
 }
-#endif*/
+#endif
 #endif

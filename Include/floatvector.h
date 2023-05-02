@@ -2,6 +2,10 @@
 #define FLOATVECTOR_H
 
 #include <stdint.h>
+
+#ifdef __cplusplus
+extern "C"{ 
+#endif
 /*
  * NEVER modify values other then the content of the array.
  */
@@ -32,4 +36,8 @@ float* float_vector_add(FloatVector*, float);
 int float_vector_remove(FloatVector*, int32_t);
 FloatVector* float_vector_init(int32_t, int32_t);
 void float_vector_destroy(FloatVector*);
+
+#ifdef __cplusplus
+}
+#endif
 #endif
