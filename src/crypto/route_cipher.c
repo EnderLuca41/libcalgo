@@ -34,7 +34,7 @@ static void zigzag_downup_encrypt(const char *input, char *dest, uint32_t rows){
     *dest = 0;
 }
 
-void zigzag_downup_decrypt(const char *input, char *dest, uint32_t rows){
+static void zigzag_downup_decrypt(const char *input, char *dest, uint32_t rows){
     size_t inputLen = strlen(input);
     uint32_t columns = inputLen / rows;
 
