@@ -215,29 +215,20 @@ static uint32_t F(uint32_t val, uint64_t key){
     val = 0;
 
     val ^= S1[(val64 >> 42) & 0b111111];
-    // printf("%u ", S8[val64 & 0b111111]);
     val <<= 4;
     val ^= S2[(val64 >> 36) & 0b111111];
-    // printf("%u ", S7[(val64 >> 6) & 0b111111]);
     val <<= 4;
     val ^= S3[(val64 >> 30) & 0b111111];
-    // printf("%u ", S6[(val64 >> 12) & 0b111111]);
     val <<= 4;
     val ^= S4[(val64 >> 24) & 0b111111];
-    // printf("%u ", S5[(val64 >> 18) & 0b111111]);
     val <<= 4;
     val ^= S5[(val64 >> 18) & 0b111111];
-    //  printf("%u ", S4[(val64 >> 24) & 0b111111]);
     val <<= 4;
     val ^= S6[(val64 >> 12) & 0b111111];
-    // printf("%u ", S3[(val64 >>30) & 0b111111]);
     val <<= 4;
     val ^= S7[(val64 >> 6) & 0b111111];
-    // printf("%u ", S2[(val64 >> 36) & 0b111111]);
     val <<= 4;
     val ^= S8[val64 & 0b111111];
-    // printf("%u ", S1[(val64 >> 42) & 0b111111]);
-    // puts("");
 
 
     return P(val);
