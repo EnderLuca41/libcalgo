@@ -27,6 +27,12 @@ typedef enum{
     SpiralCounterclockwise
 } Route;
 
+//For Two Square Cipher
+typedef enum{
+    Horizontal,
+    Vertical
+} GridPosition;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
