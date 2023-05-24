@@ -1,55 +1,56 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
-static void lower_string(char *text){
-    for(;*text != 0; text++)
-        *text = tolower(*text);
+static int mod(int x,int N){
+    return (x % N + N) %N;
 }
 
-void vigenere_cipher_encrypt(char *text, const char *key){
-    int keylen = strlen(key);
-    char* keylower = malloc(keylen);
-    memcpy(keylower, key, keylen);
-    lower_string(keylower);
+//Returns false if key has non ascii characters
+bool vigenere_encrypt(char *text, const char *key, const char *alphabet){
+    size_t keyLen = strlen(key);
+    size_t alphabetLen = strlen(alphabet);
 
-    for(size_t i = 0; text[i] != 0; i++){
-        if(isupper(text[i])){
-            text[i] += (keylower[i % keylen] - 97);
-            if(text[i] > 'Z')
-                text[i] -= 26;
+    //Create lookup table for the position of the characters
+    unsigned char lookup[128];
+    memset(lookup, 255, 128);
+    for(unsigned char i = 0; i < alphabetLen; i++){
+        if(alphabet[i] < 0)
+            return false;
+        lookup[alphabet[i]] = i;
+    }
+
+    unsigned char j = 0; //Index of key
+    for(size_t i = 0; text[i] != '\0'; i++){
+        if(lookup[text[i]] == 255)
             continue;
-        }
 
-        if(islower(text[i])){
-            text[i] += (keylower[i % keylen] - 97);
-            if(text[i] > 'z')
-                text[i] -= 26;
-        }
+        text[i] = alphabet[(lookup[text[i]] + lookup[key[j]]) % alphabetLen];
+        j = (j + 1) % keyLen;
     }
 
-    free(keylower);
+    return true;
 }
 
-void vigenere_cipher_decrypt(char *text, const char *key){
-    int keylen = strlen(key);
-    char* keylower = malloc(keylen);
-    memcpy(keylower, key, keylen);
-    lower_string(keylower);
+void vigenere_decrypt(char *text, const char *key, const char *alphabet){
+    size_t keyLen = strlen(key);
+    size_t alphabetLen = strlen(alphabet);
 
-    for(size_t i = 0; text[i] != 0; i++){
-        if(isupper(text[i])){
-            text[i] -= (keylower[i % keylen] - 97);
-            if(text[i] < 'A')
-                text[i] += 26;
-        }
-
-        if(islower(text[i])){
-            text[i] -= (keylower[i % keylen] - 97);
-            if(text[i] < 'a')
-                text[i] += 26;
-        }
+    //Create lookup table for the position of the characters
+    unsigned char lookup[128];
+    memset(lookup, 255, 128);
+    for(unsigned char i = 0; i < alphabetLen; i++){
+        lookup[alphabet[i]] = i;
     }
 
-    free(keylower);
+    unsigned char j = 0; //Index of key
+    for(size_t i = 0; text[i] != '\0'; i++){
+        if(lookup[text[i]] == 255)
+            continue;
+
+        text[i] = alphabet[mod(lookup[text[i]] - lookup[key[j]], alphabetLen)];
+        j = (j + 1) % keyLen;
+    }
+
 }
