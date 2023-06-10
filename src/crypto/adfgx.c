@@ -82,7 +82,7 @@ bool adfgx_encrypt(const char *text, char *dest, const char square[26], const ch
     return true;
 }
 
-const static char lookup[] = {0, -1, -1, 1, -1, 2, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 4, -1, -1};
+const static char Lookup[] = {0, -1, -1, 1, -1, 2, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 4, -1, -1};
 
 void adfgx_decrypt(const char *text, char *dest, const char square[26], const char *key){
     if(square == NULL)
@@ -94,8 +94,8 @@ void adfgx_decrypt(const char *text, char *dest, const char square[26], const ch
 
     size_t buffCounter = 0;
     while(buff[buffCounter] != '\0'){
-        uint8_t posY = lookup[buff[buffCounter] - 'A'];
-        uint8_t posX = lookup[buff[buffCounter+1] - 'A'];
+        uint8_t posY = Lookup[buff[buffCounter] - 'A'];
+        uint8_t posX = Lookup[buff[buffCounter+1] - 'A'];
         
         *dest = square[posY * 5 + posX];
         buffCounter += 2;

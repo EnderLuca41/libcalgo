@@ -4,7 +4,7 @@
 #include <string.h>
 
 //Alphabet without J because J's get geplaced wtih I's in the encryption process
-static const char alphabet[26] = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
+static const char Alphabet[26] = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
 
 //Get pointer to next alphabetic character
 static const char *next_alpha(const char *input){
@@ -50,7 +50,7 @@ static void fill_grid(char grid[25], const char *keyword){
     }
 
     //Fill remaining space with all character that are not already in the grid
-    const char *alphabetPtr = alphabet;
+    const char *alphabetPtr = Alphabet;
     while(letterCopied != 25){
         int i = 0;
         for(; i < letterCopied; i++)
@@ -132,8 +132,8 @@ void four_square_decrypt(const char *input, char *dest, const char *keyword1, co
         int char1Pos = lookup1[dest[0] - 65];
         int char2Pos = lookup2[dest[1] - 65];
 
-        dest[0] = alphabet[char1Pos / 5 * 5 + char2Pos % 5];
-        dest[1] = alphabet[char2Pos / 5 * 5 + char1Pos % 5];
+        dest[0] = Alphabet[char1Pos / 5 * 5 + char2Pos % 5];
+        dest[1] = Alphabet[char2Pos / 5 * 5 + char1Pos % 5];
         input += 2;
         dest += 2;
     }

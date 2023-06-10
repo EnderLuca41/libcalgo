@@ -1,6 +1,6 @@
 #include <ctype.h>
 
-const char lookup[26] = {
+const static char Lookup[26] = {
     'Z' ,'Y' ,'X' ,'W' ,'V' ,
     'U' ,'T' ,'S' ,'R' ,'Q' ,
     'P' ,'O' ,'N' ,'M' ,'L' ,
@@ -13,12 +13,12 @@ const char lookup[26] = {
 void atbash_encrypt_decrypt(char *text){
     for(; *text != 0; text++){
         if(islower(*text)){
-            *text = lookup[*text - 97] + 32;
+            *text = Lookup[*text - 97] + 32;
             continue;
         }
 
         if(isupper(*text)){
-            *text = lookup[*text - 65];
+            *text = Lookup[*text - 65];
         }
     }
 }

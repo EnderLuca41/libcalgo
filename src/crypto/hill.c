@@ -2,7 +2,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdbool.h>
-static const char standardAlphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz !?/,;.:-_+*#&";
+static const char StandardAlphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz !?/,;.:-_+*#&";
 
 static int mod(int x,int N){
     return (x % N + N) %N;
@@ -187,7 +187,7 @@ bool inverse_matrix(const int matrix[], char dest[], int size, int alphabetSize)
 
 bool hill_encrypt(const char *input, char *dest, const char *key, const char *alphabet){
     if(alphabet == NULL)
-        alphabet = standardAlphabet;
+        alphabet = StandardAlphabet;
 
     //Check if the length of key has a non floating point square root
     //This is because it is later represented as n * n big table
@@ -249,7 +249,7 @@ bool hill_encrypt(const char *input, char *dest, const char *key, const char *al
 
 bool hill_decrypt(const char *input, char *dest, const char *key, const char *alphabet){
     if(alphabet == NULL)
-        alphabet = standardAlphabet;
+        alphabet = StandardAlphabet;
 
     //Check if the length of key has a non floating point square root
     //This is because it is later represented as n * n big table
