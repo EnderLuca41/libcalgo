@@ -4,7 +4,7 @@
 #include <ctype.h>
 
 //Alphabet without J because J's get geplaced wtih I's in the encryption process
-const char alphabet[26] = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
+const char Alphabet[26] = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
 
 //Find the next alphabetic character and return a pointer to it
 const char *next_alpha(const char *input){
@@ -138,7 +138,7 @@ void playfair_encrypt(const char *input, char *dest, const char *keyword)
     }
 
     //Fill the rest of table with the alphabet
-    const char *alphabetPtr = alphabet;
+    const char *alphabetPtr = Alphabet;
     while (letterCopied != 25)
     {    
         int i = 0;
@@ -278,7 +278,7 @@ void playfair_decrypt(const char *input, char *dest, const char *keyword){
     }
 
     //Fill the rest of table with the alphabet
-    const char *alphabetPtr = alphabet;
+    const char *alphabetPtr = Alphabet;
     while (letterCopied != 25)
     {    
         int i = 0;

@@ -6,7 +6,7 @@
 #include <crypto.h>
 
 //Alphabet without J because J's get geplaced wtih I's in the encryption process
-static const char alphabet[26] = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
+static const char Alphabet[26] = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
 
 //Get pointer to next alphabetic character
 static const char *next_alpha(const char *input){
@@ -52,7 +52,7 @@ static void fill_grid(char grid[25], const char *keyword){
     }
 
     //Fill remaining space with all character that are not already in the grid
-    const char *alphabetPtr = alphabet;
+    const char *alphabetPtr = Alphabet;
     while(letterCopied != 25){
         int i = 0;
         for(; i < letterCopied; i++)
