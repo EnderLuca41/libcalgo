@@ -18,8 +18,6 @@ static void key_schedule(uint8_t initKey[16], uint8_t outputKeys[11][16]){
         uint8_t lastColumn[4];
         for(unsigned j = 0; j < 4; j++){
             lastColumn[j] = outputKeys[i-1][j + 12];
-            //buffer the last row
-            outputKeys[i][j + 12] = outputKeys[i-1][j + 12];
         }
 
         rotword(lastColumn);
