@@ -109,7 +109,7 @@ size_t aes128_encrypt(const void *input, uint8_t *dest, size_t inputSize, uint8_
         dataLeft = generate_block(block, &buffer); 
 
         //Initial Round
-        for(unsigned int i = 0; i < 4; i++){
+        for(unsigned int i = 0; i < 16; i++){
             block[i] ^= keys[0][i]; 
         }
 
