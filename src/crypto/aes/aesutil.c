@@ -1,5 +1,9 @@
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
+
+#include "aesutil.h"
+#include <util.h>
 
 //Rijndaes substitution box
 
@@ -228,6 +232,41 @@ void mix_column(uint8_t b[4]){
     memcpy(b, output, 4);
 }
 
+void mix_columns(uint8_t b[16]){
+     for(unsigned int j = 0; j < 4; j++){
+        uint8_t column[4];
+        for(unsigned int k = 0; k < 4; k++) {
+            column[k] = b[j * 4 + k];
+        }
+
+        mix_column(column);
+
+        for(unsigned int k = 0; k < 4; k++){
+            b[j * 4 + k] = column[k];
+        }
+    }
+}
+
+void shift_rows(uint8_t b[16]){
+    for(unsigned int i = 1; i < 4; i++){
+        uint32_t buffer = 0;
+        uint8_t shifts = 24;
+
+        for(unsigned int j = 0; j < 16; j+=4){
+            buffer |= ((uint32_t) b[j + i]) << shifts;
+            shifts -= 8;
+        }
+
+        buffer = left_rot32(buffer, i * 8);
+
+        shifts = 24;
+        for(unsigned int j = 0; j < 16; j+=4){
+            b[j + i] = (buffer >> shifts) & 0xff;
+            shifts -= 8;
+        }
+    }
+}
+
 const static uint8_t InverseMixMatrix[16] = {
     14,11,13, 9,
     9, 14,11,13,
@@ -262,4 +301,56 @@ void undo_mix_column(uint8_t b[4]){
     }
 
     memcpy(b, output, 4);
+}
+
+void undo_mix_columns(uint8_t b[16]){
+     for(unsigned int j = 0; j < 4; j++){
+        uint8_t column[4];
+        for(unsigned int k = 0; k < 4; k++) {
+            column[k] = b[j * 4 + k];
+        }
+
+        undo_mix_column(column);
+
+        for(unsigned int k = 0; k < 4; k++){
+            b[j * 4 + k] = column[k];
+        }
+    }
+}
+
+void undo_shift_rows(uint8_t b[16]){
+    for(unsigned int i = 1; i < 4; i++){
+        uint32_t buffer = 0;
+        uint8_t shifts = 24;
+
+        for(unsigned int j = 0; j < 16; j+=4){
+            buffer |= ((uint32_t) b[j + i]) << shifts;
+            shifts -= 8;
+        }
+
+        buffer = right_rot32(buffer, i * 8);
+
+        shifts = 24;
+        for(unsigned int j = 0; j < 16; j+=4){
+            b[j + i] = (buffer >> shifts) & 0xff;
+            shifts -= 8;
+        }
+    }
+}
+
+
+bool generate_block(uint8_t block[16], AesBuffer *buffer){
+    if(buffer->inputSize <= 16){
+        memcpy(block, buffer->input, buffer->inputSize);
+        memset(((void*) block) + buffer->inputSize, 0, 16 - buffer->inputSize);
+        buffer->input -= buffer->inputSize;
+        buffer->inputSize = 0;
+        return false;
+    }
+
+    memcpy(block, buffer->input, 16);
+    buffer->input += 16;
+    buffer->inputSize -= 16;
+
+    return true;
 }
