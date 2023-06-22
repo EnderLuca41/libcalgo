@@ -5,7 +5,7 @@
 
 #include "aesutil.h"
 
-void key_schedule(const uint8_t initKey[24], uint8_t outputKeys[13][16]){
+static void key_schedule(const uint8_t initKey[24], uint8_t outputKeys[13][16]){
     //Casting 2D array to 1D array, the output 13 * 16 wide but while calculating we use in theory a 9 * 24 array
     //Instead of working on a 9 * 24 array and later copying into the output we just cast and interpret the 1D array
     //dependent on the situation
