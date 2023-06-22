@@ -241,7 +241,7 @@ void des_encrypt(uint8_t *data, uint8_t *dest, size_t dataLen, uint64_t key){
 
 
     //Key schedule
-    static uint64_t subkeys[16];
+    uint64_t subkeys[16];
     for(uint32_t i = 0; i < 16; i++){
         left = left_rot28(left, Rotations[i]);
         right = left_rot28(right, Rotations[i]);
