@@ -3,13 +3,9 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include <util.h>
 #include "aesutil.h"
 
 
-static int mod(int x, int N){
-    return (x % N + N) %N;
-}
 
 static void key_schedule(uint8_t initKey[16], uint8_t outputKeys[11][16]){
     memcpy(outputKeys[0], initKey, 16);
