@@ -94,6 +94,38 @@ size_t aes192_encrypt_ECB(const void *input, void *dest, size_t inputSize, const
     return encrypted;
 }
 
+size_t aes192_encrypt_CBC(const void *input, void *dest, size_t inputSize, const uint8_t key[24], const uint8_t initVector[16]){
+    uint8_t keys[13][16];
+    key_schedule(key, keys);
+
+    AesBuffer buffer;
+    buffer.input = input;
+    buffer.inputSize = inputSize;
+
+    uint8_t lastBlock[16];
+    memcpy(lastBlock, initVector, sizeof(lastBlock));
+
+    uint8_t block[16];
+    size_t encrypted = 0;
+    bool dataLeft;   
+    do {
+        dataLeft = generate_block(block, &buffer);
+
+        for(unsigned int i = 0; i < 16; i++){
+            block[i] ^= lastBlock[i];
+        }
+
+        encrypt_block(block, keys);
+
+        memcpy(lastBlock, block, 16);
+        memcpy(&((uint8_t *) dest)[encrypted], block, sizeof(block));
+        encrypted += 16;
+    } while (dataLeft);
+    
+
+    return encrypted;
+}
+
 static void decrypt_block(uint8_t block[16], uint8_t keys[13][16]){
     for(unsigned int i = 0; i < 16; i++) {
         block[i] ^= keys[12][i];
@@ -139,6 +171,35 @@ void aes192_decrypt_ECB(const void *input, void *dest, size_t inputSize, uint8_t
         decrypt_block(block, keys);
 
         memcpy(dest, block, sizeof(block));
+        inputSize -= 16;
+        dest += 16;
+        input += 16;
+    }
+}
+
+void aes192_decrypt_CBC(const void *input, void *dest, size_t inputSize, uint8_t key[24], const uint8_t initVector[16]){
+    uint8_t keys[13][16];
+    key_schedule(key, keys);
+
+    AesBuffer buffer;
+    buffer.input = input;
+    buffer.inputSize = inputSize;
+
+    uint8_t lastBlock[16];
+    memcpy(lastBlock, initVector, sizeof(lastBlock));
+
+    uint8_t block[16];
+    while(inputSize != 0) {
+        memcpy(block, input, sizeof(block));
+
+        decrypt_block(block, keys);
+
+        for(unsigned int i = 0; i < 16; i++){
+            block[i] ^= lastBlock[i];
+        }
+
+        memcpy(dest, block, sizeof(block));
+        memcpy(lastBlock, input, sizeof(lastBlock));
         inputSize -= 16;
         dest += 16;
         input += 16;

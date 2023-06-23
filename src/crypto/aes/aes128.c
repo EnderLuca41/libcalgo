@@ -87,6 +87,37 @@ size_t aes128_encrypt_ECB(const void *input, uint8_t *dest, size_t inputSize, ui
     return encrypted;
 }
 
+size_t aes128_encrypt_CBC(const void *input, uint8_t *dest, size_t inputSize, uint8_t key[16], const uint8_t initVector[16]){
+    uint8_t keys[11][16];
+    key_schedule(key, keys);
+
+    AesBuffer buffer;
+    buffer.input = input;
+    buffer.inputSize = inputSize;
+
+    uint8_t lastBlock[16];
+    memcpy(lastBlock, initVector, sizeof(lastBlock));
+
+    uint8_t block[16];
+    size_t encrypted = 0;
+    bool dataLeft;
+    do {
+        dataLeft = generate_block(block, &buffer); 
+        for(unsigned int i = 0; i < 16; i++){
+            block[i] ^= lastBlock[i];
+        }
+        
+        encrypt_block(block, keys);        
+
+        memcpy(lastBlock, block, 16);
+        memcpy(&(((uint8_t *) dest)[encrypted]), block, 16);
+        encrypted += 16;
+    }
+    while (dataLeft);
+
+    return encrypted;
+}
+
 static void decrypt_block(uint8_t block[16], uint8_t keys[11][16]){
     for(unsigned int i = 0; i < 16; i++){
         block[i] ^= keys[10][i];
@@ -129,6 +160,30 @@ void aes128_decrypt_ECB(const void *input, void *dest, size_t inputSize, uint8_t
         decrypt_block(block, keys);
 
         memcpy(dest, block, 16);
+        inputSize -= 16;
+        input += 16;
+        dest += 16;
+    }
+}
+
+void aes128_decrypt_CBC(const void *input, void *dest, size_t inputSize, uint8_t key[16], const uint8_t initVector[16]){
+    uint8_t keys[11][16];
+    key_schedule(key, keys);
+
+    uint8_t lastBlock[16];
+    memcpy(lastBlock, initVector, sizeof(lastBlock));
+    uint8_t block[16];
+    while(inputSize != 0){
+        memcpy(block, input, 16);
+
+        decrypt_block(block, keys);
+
+        for(unsigned int i = 0; i < 16; i++){
+            block[i] ^= lastBlock[i];
+        }
+
+        memcpy(dest, block, 16);
+        memcpy(lastBlock, input, 16);
         inputSize -= 16;
         input += 16;
         dest += 16;
