@@ -70,7 +70,7 @@ static void encrypt_block(uint8_t block[16], uint8_t keys[13][16]){
     }
 }
 
-size_t aes192_encrypt(const void *input, void *dest, size_t inputSize, const uint8_t key[24]){
+size_t aes192_encrypt_ECB(const void *input, void *dest, size_t inputSize, const uint8_t key[24]){
     uint8_t keys[13][16];
     key_schedule(key, keys);
 
@@ -124,7 +124,7 @@ static void decrypt_block(uint8_t block[16], uint8_t keys[13][16]){
     }
 }
 
-void aes192_decrypt(const void *input, void *dest, size_t inputSize, uint8_t key[24]){
+void aes192_decrypt_ECB(const void *input, void *dest, size_t inputSize, uint8_t key[24]){
     uint8_t keys[13][16];
     key_schedule(key, keys);
 

@@ -75,7 +75,7 @@ static void encrypt_block(uint8_t block[16], uint8_t keys[15][16]){
 
 
 //Return size encryped in dest
-size_t aes256_encrypt(const void *input, uint8_t *dest, size_t inputSize, uint8_t key[32]){
+size_t aes256_encrypt_ECB(const void *input, uint8_t *dest, size_t inputSize, uint8_t key[32]){
     uint8_t keys[15][16];
     key_schedule(key, keys);
 
@@ -130,7 +130,7 @@ static void decrypt_block(uint8_t block[16], uint8_t keys[15][16]){
     }
 }
 
-void aes256_decrypt(const void *input, void *dest, size_t inputSize, uint8_t key[32]){
+void aes256_decrypt_ECB(const void *input, void *dest, size_t inputSize, uint8_t key[32]){
     uint8_t keys[15][16];
     key_schedule(key, keys);
 

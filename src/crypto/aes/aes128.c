@@ -63,7 +63,7 @@ static void encrypt_block(uint8_t block[16], uint8_t keys[11][16]){
 }
 
 //Return size encryped in dest
-size_t aes128_encrypt(const void *input, uint8_t *dest, size_t inputSize, uint8_t key[16]){
+size_t aes128_encrypt_ECB(const void *input, uint8_t *dest, size_t inputSize, uint8_t key[16]){
     uint8_t keys[11][16];
     key_schedule(key, keys);
 
@@ -118,7 +118,7 @@ static void decrypt_block(uint8_t block[16], uint8_t keys[11][16]){
     }
 }
 
-void aes128_decrypt(const void *input, void *dest, size_t inputSize, uint8_t key[16]){
+void aes128_decrypt_ECB(const void *input, void *dest, size_t inputSize, uint8_t key[16]){
     uint8_t keys[11][16];
     key_schedule(key, keys);
 
