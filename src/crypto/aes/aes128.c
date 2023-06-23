@@ -29,6 +29,39 @@ static void key_schedule(uint8_t initKey[16], uint8_t outputKeys[11][16]){
     }
 }
 
+static void encrypt_block(uint8_t block[16], uint8_t keys[11][16]){
+    //Initial Round
+    for(unsigned int i = 0; i < 16; i++){
+        block[i] ^= keys[0][i]; 
+    }
+
+    for(unsigned int i = 1; i < 10; i++){
+        //SubBytes
+        for(unsigned int j = 0; j < 16; j++){
+            block[j] = S_Rijndael[block[j]];
+        }
+
+        shift_rows(block);       
+
+        mix_columns(block);
+
+        for(unsigned int j = 0; j < 16; j++){
+            block[j] ^= keys[i][j];
+        }
+    }
+
+    //Final Round
+    for(unsigned int j = 0; j < 16; j++){
+        block[j] = S_Rijndael[block[j]];
+    }
+
+    shift_rows(block);
+
+    for(unsigned int j = 0; j < 16; j++){
+        block[j] ^= keys[10][j];
+    }
+}
+
 //Return size encryped in dest
 size_t aes128_encrypt(const void *input, uint8_t *dest, size_t inputSize, uint8_t key[16]){
     uint8_t keys[11][16];
@@ -44,39 +77,7 @@ size_t aes128_encrypt(const void *input, uint8_t *dest, size_t inputSize, uint8_
     do {
         dataLeft = generate_block(block, &buffer); 
 
-        //Initial Round
-        for(unsigned int i = 0; i < 16; i++){
-            block[i] ^= keys[0][i]; 
-        }
-
-        for(unsigned int i = 1; i < 10; i++){
-            //SubBytes
-            for(unsigned int j = 0; j < 16; j++){
-                block[j] = S_Rijndael[block[j]];
-            }
-
-            shift_rows(block);       
-
-            mix_columns(block);
-
-            for(unsigned int j = 0; j < 16; j++){
-                block[j] ^= keys[i][j];
-            }
-        }
-
-        //Final Round
-
-        for(unsigned int j = 0; j < 16; j++){
-            block[j] = S_Rijndael[block[j]];
-        }
-
-
-        shift_rows(block);
-
-        for(unsigned int j = 0; j < 16; j++){
-            block[j] ^= keys[10][j];
-        }
-        
+        encrypt_block(block, keys);        
 
         memcpy(&(((uint8_t *) dest)[encrypted]), block, 16);
         encrypted += 16;
@@ -84,6 +85,37 @@ size_t aes128_encrypt(const void *input, uint8_t *dest, size_t inputSize, uint8_
     while (dataLeft);
 
     return encrypted;
+}
+
+static void decrypt_block(uint8_t block[16], uint8_t keys[11][16]){
+    for(unsigned int i = 0; i < 16; i++){
+        block[i] ^= keys[10][i];
+    }
+
+    undo_shift_rows(block);
+
+    for(unsigned int i = 0; i < 16; i++){
+        block[i] = S_RijndaelInverse[block[i]];
+    }
+
+
+    for(unsigned int i = 9; i > 0; i--){
+        for(unsigned int j = 0; j < 16; j++){
+            block[j] ^= keys[i][j];
+        }
+
+        undo_mix_columns(block);
+
+        undo_shift_rows(block);
+
+        for(unsigned int i = 0; i < 16; i++){
+            block[i] = S_RijndaelInverse[block[i]];
+        }
+    }
+
+    for(unsigned int i = 0; i < 16; i++){
+        block[i] ^= keys[0][i];
+    }
 }
 
 void aes128_decrypt(const void *input, void *dest, size_t inputSize, uint8_t key[16]){
@@ -94,34 +126,7 @@ void aes128_decrypt(const void *input, void *dest, size_t inputSize, uint8_t key
     while(inputSize != 0){
         memcpy(block, input, 16);
 
-        for(unsigned int i = 0; i < 16; i++){
-            block[i] ^= keys[10][i];
-        }
-
-        undo_shift_rows(block);
-
-        for(unsigned int i = 0; i < 16; i++){
-            block[i] = S_RijndaelInverse[block[i]];
-        }
-
-
-        for(unsigned int i = 9; i > 0; i--){
-            for(unsigned int j = 0; j < 16; j++){
-                block[j] ^= keys[i][j];
-            }
-
-            undo_mix_columns(block);
-
-            undo_shift_rows(block);
-
-            for(unsigned int i = 0; i < 16; i++){
-                block[i] = S_RijndaelInverse[block[i]];
-            }
-        }
-    
-        for(unsigned int i = 0; i < 16; i++){
-            block[i] ^= keys[0][i];
-        }
+        decrypt_block(block, keys);
 
         memcpy(dest, block, 16);
         inputSize -= 16;
