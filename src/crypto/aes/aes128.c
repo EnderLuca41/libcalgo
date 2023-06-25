@@ -154,6 +154,39 @@ size_t aes128_encrypt_PCBC(const void *input, uint8_t *dest, size_t inputSize, u
     return encrypted;
 }
 
+size_t aes128_encrypt_CTR(const void *input, uint8_t *dest, size_t inputSize, uint8_t key[16], const uint8_t initVector[8]){
+    uint8_t keys[11][16];
+    key_schedule(key, keys);
+
+    AesBuffer buffer;
+    buffer.input = input;
+    buffer.inputSize = inputSize;
+
+    uint64_t counter = 0;
+    uint8_t counterBlock[16];
+    uint8_t block[16];
+    size_t encrypted = 0;
+    bool dataLeft;
+    do {
+        dataLeft = generate_block(block, &buffer); 
+        
+        memcpy(counterBlock, initVector, 8);
+        memcpy(counterBlock + 8, &counter, 8);
+        encrypt_block(counterBlock, keys);        
+
+        for(unsigned int i = 0; i < 16; i++){
+            block[i] ^= counterBlock[i];
+        }
+
+        memcpy(&(((uint8_t *) dest)[encrypted]), block, 16);
+        encrypted += 16;
+        counter++;
+    }
+    while (dataLeft);
+
+    return encrypted;
+}
+
 static void decrypt_block(uint8_t block[16], uint8_t keys[11][16]){
     for(unsigned int i = 0; i < 16; i++){
         block[i] ^= keys[10][i];
@@ -251,5 +284,31 @@ void aes128_decrypt_PCBC(const void *input, void *dest, size_t inputSize, uint8_
         inputSize -= 16;
         input += 16;
         dest += 16;
+    }
+}
+
+void aes128_decrypt_CTR(const void *input, void *dest, size_t inputSize, uint8_t key[16], const uint8_t initVector[8]){
+    uint8_t keys[11][16];
+    key_schedule(key, keys);
+
+    uint64_t counter = 0;
+    uint8_t counterBlock[16];
+    uint8_t block[16];
+    while(inputSize != 0){
+        memcpy(block, input, 16);
+
+        memcpy(counterBlock, initVector, 8);
+        memcpy(counterBlock + 8, &counter, 8);
+        encrypt_block(counterBlock, keys);    
+
+        for(unsigned int i = 0; i < 16; i++){
+            block[i] ^= counterBlock[i];
+        }
+
+        memcpy(dest, block, 16);    
+        inputSize -= 16;
+        input += 16;
+        dest += 16;
+        counter++;
     }
 }

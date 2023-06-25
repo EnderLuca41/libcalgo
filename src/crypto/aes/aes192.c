@@ -162,6 +162,39 @@ size_t aes192_encrypt_PCBC(const void *input, void *dest, size_t inputSize, cons
     return encrypted;
 }
 
+size_t aes192_encrypt_CTR(const void *input, void *dest, size_t inputSize, const uint8_t key[24], const uint8_t initVector[8]){
+    uint8_t keys[13][16];
+    key_schedule(key, keys);
+
+    AesBuffer buffer;
+    buffer.input = input;
+    buffer.inputSize = inputSize;
+
+    uint64_t counter = 0;
+    uint8_t counterBlock[16];
+    uint8_t block[16];
+    size_t encrypted = 0;
+    bool dataLeft;   
+    do {
+        dataLeft = generate_block(block, &buffer);
+
+        memcpy(counterBlock, initVector, 8);
+        memcpy(counterBlock + 8, &counter, 8);
+        encrypt_block(counterBlock, keys);        
+
+        for(unsigned int i = 0; i < 16; i++){
+            block[i] ^= counterBlock[i];
+        }
+        
+        memcpy(&((uint8_t *) dest)[encrypted], block, sizeof(block));
+        encrypted += 16;
+        counter++;
+    } while (dataLeft);
+    
+
+    return encrypted;
+}
+
 static void decrypt_block(uint8_t block[16], uint8_t keys[13][16]){
     for(unsigned int i = 0; i < 16; i++) {
         block[i] ^= keys[12][i];
@@ -272,5 +305,35 @@ void aes192_decrypt_PCBC(const void *input, void *dest, size_t inputSize, uint8_
         inputSize -= 16;
         dest += 16;
         input += 16;
+    }
+}
+
+void aes192_decrypt_CTR(const void *input, void *dest, size_t inputSize, uint8_t key[24], const uint8_t initVector[8]){
+    uint8_t keys[13][16];
+    key_schedule(key, keys);
+
+    AesBuffer buffer;
+    buffer.input = input;
+    buffer.inputSize = inputSize;
+
+    uint64_t counter = 0;
+    uint8_t counterBlock[16];
+    uint8_t block[16];
+    while(inputSize != 0) {
+        memcpy(block, input, sizeof(block));
+
+        memcpy(counterBlock, initVector, 8);
+        memcpy(counterBlock + 8, &counter, 8);
+        encrypt_block(counterBlock, keys);    
+
+        for(unsigned int i = 0; i < 16; i++){
+            block[i] ^= counterBlock[i];
+        }
+       
+        memcpy(dest, block, sizeof(block));
+        inputSize -= 16;
+        dest += 16;
+        input += 16;
+        counter++;
     }
 }
