@@ -187,7 +187,7 @@ size_t aes128_encrypt_CTR(const void *input, uint8_t *dest, size_t inputSize, ui
     return encrypted;
 }
 
-size_t aes128_encrypt_PCBC(const void *input, uint8_t *dest, size_t inputSize, uint8_t key[16], const uint8_t initVector[16]){
+size_t aes128_encrypt_CFB(const void *input, uint8_t *dest, size_t inputSize, uint8_t key[16], const uint8_t initVector[16]){
     uint8_t keys[11][16];
     key_schedule(key, keys);
 
