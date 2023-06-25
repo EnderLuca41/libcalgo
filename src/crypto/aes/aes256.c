@@ -200,6 +200,37 @@ size_t aes256_encrypt_CTR(const void *input, uint8_t *dest, size_t inputSize, ui
     return encrypted;
 }
 
+size_t aes256_encrypt_CFB(const void *input, uint8_t *dest, size_t inputSize, uint8_t key[32], const uint8_t initVector[16]){
+    uint8_t keys[15][16];
+    key_schedule(key, keys);
+
+    AesBuffer buffer;
+    buffer.input = input;
+    buffer.inputSize = inputSize;
+
+    uint8_t lastBlock[16];
+    memcpy(lastBlock, initVector, sizeof(lastBlock));
+
+    uint8_t block[16];
+    size_t encrypted = 0;
+    bool dataLeft;
+    do {
+        dataLeft = generate_block(block, &buffer); 
+
+        encrypt_block(lastBlock, keys);
+
+        for(unsigned int i = 0; i < 16; i++){
+            lastBlock[i] ^= block[i];
+        }     
+
+        memcpy(&(((uint8_t *) dest)[encrypted]), lastBlock, 16);
+        encrypted += 16;
+    }
+    while (dataLeft);
+
+    return encrypted;
+}
+
 static void decrypt_block(uint8_t block[16], uint8_t keys[15][16]){
     for(unsigned int i = 0; i < 16; i++){
         block[i] ^= keys[14][i];
@@ -326,5 +357,30 @@ void aes256_decrypt_CTR(const void *input, void *dest, size_t inputSize, uint8_t
         input += 16;
         dest += 16;
         counter++;
+    }
+}
+
+void aes256_decrypt_CFB(const void *input, void *dest, size_t inputSize, uint8_t key[32], const uint8_t initVector[16]){
+    uint8_t keys[15][16];
+    key_schedule(key, keys);
+
+    uint8_t lastBlock[16];
+    memcpy(lastBlock, initVector, sizeof(lastBlock));
+
+    uint8_t block[16];
+    while(inputSize != 0){
+        memcpy(block, input, 16);
+
+        encrypt_block(lastBlock, keys);
+
+        for(unsigned int i = 0; i < 16; i++){
+            lastBlock[i] ^= block[i];
+        }
+
+        memcpy(dest, lastBlock, 16);
+        memcpy(lastBlock, block, 16);
+        inputSize -= 16;
+        input += 16;
+        dest += 16;
     }
 }

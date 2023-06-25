@@ -195,6 +195,37 @@ size_t aes192_encrypt_CTR(const void *input, void *dest, size_t inputSize, const
     return encrypted;
 }
 
+size_t aes192_encrypt_CFB(const void *input, void *dest, size_t inputSize, const uint8_t key[24], const uint8_t initVector[16]){
+    uint8_t keys[13][16];
+    key_schedule(key, keys);
+
+    AesBuffer buffer;
+    buffer.input = input;
+    buffer.inputSize = inputSize;
+
+    uint8_t lastBlock[16];
+    memcpy(lastBlock, initVector, sizeof(lastBlock));
+
+    uint8_t block[16];
+    size_t encrypted = 0;
+    bool dataLeft;   
+    do {
+        dataLeft = generate_block(block, &buffer);
+
+        encrypt_block(lastBlock, keys);        
+
+        for(unsigned int i = 0; i < 16; i++){
+            lastBlock[i] ^= block[i];
+        }   
+
+        memcpy(&((uint8_t *) dest)[encrypted], lastBlock, sizeof(block));
+        encrypted += 16;
+    } while (dataLeft);
+    
+
+    return encrypted;
+}
+
 static void decrypt_block(uint8_t block[16], uint8_t keys[13][16]){
     for(unsigned int i = 0; i < 16; i++) {
         block[i] ^= keys[12][i];
@@ -229,10 +260,6 @@ void aes192_decrypt_ECB(const void *input, void *dest, size_t inputSize, uint8_t
     uint8_t keys[13][16];
     key_schedule(key, keys);
 
-    AesBuffer buffer;
-    buffer.input = input;
-    buffer.inputSize = inputSize;
-
     uint8_t block[16];
     while(inputSize != 0) {
         memcpy(block, input, sizeof(block));
@@ -249,10 +276,6 @@ void aes192_decrypt_ECB(const void *input, void *dest, size_t inputSize, uint8_t
 void aes192_decrypt_CBC(const void *input, void *dest, size_t inputSize, uint8_t key[24], const uint8_t initVector[16]){
     uint8_t keys[13][16];
     key_schedule(key, keys);
-
-    AesBuffer buffer;
-    buffer.input = input;
-    buffer.inputSize = inputSize;
 
     uint8_t lastBlock[16];
     memcpy(lastBlock, initVector, sizeof(lastBlock));
@@ -278,10 +301,6 @@ void aes192_decrypt_CBC(const void *input, void *dest, size_t inputSize, uint8_t
 void aes192_decrypt_PCBC(const void *input, void *dest, size_t inputSize, uint8_t key[24], const uint8_t initVector[16]){
     uint8_t keys[13][16];
     key_schedule(key, keys);
-
-    AesBuffer buffer;
-    buffer.input = input;
-    buffer.inputSize = inputSize;
 
     uint8_t lastBlock[16];
     memcpy(lastBlock, initVector, sizeof(lastBlock));
@@ -312,10 +331,6 @@ void aes192_decrypt_CTR(const void *input, void *dest, size_t inputSize, uint8_t
     uint8_t keys[13][16];
     key_schedule(key, keys);
 
-    AesBuffer buffer;
-    buffer.input = input;
-    buffer.inputSize = inputSize;
-
     uint64_t counter = 0;
     uint8_t counterBlock[16];
     uint8_t block[16];
@@ -335,5 +350,34 @@ void aes192_decrypt_CTR(const void *input, void *dest, size_t inputSize, uint8_t
         dest += 16;
         input += 16;
         counter++;
+    }
+}
+
+void aes192_decrypt_CFB(const void *input, void *dest, size_t inputSize, uint8_t key[24], const uint8_t initVector[16]){
+    uint8_t keys[13][16];
+    key_schedule(key, keys);
+
+    AesBuffer buffer;
+    buffer.input = input;
+    buffer.inputSize = inputSize;
+
+    uint8_t lastBlock[16];
+    memcpy(lastBlock, initVector, sizeof(lastBlock));
+
+    uint8_t block[16];
+    while(inputSize != 0) {
+        memcpy(block, input, sizeof(block));
+
+        encrypt_block(lastBlock, keys);    
+
+        for(unsigned int i = 0; i < 16; i++){
+            lastBlock[i] ^= block[i];
+        }
+       
+        memcpy(dest, lastBlock, sizeof(block));
+        memcpy(lastBlock, block, sizeof(lastBlock));
+        inputSize -= 16;
+        dest += 16;
+        input += 16;
     }
 }
