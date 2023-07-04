@@ -72,7 +72,7 @@ static void encrypt_block(uint32_t block[4], const TwofishContext *ctx){
 }
 
 //Returns size of encrypted bytes in dest
-static size_t twofish_encrypt(const void *input, void *dest, size_t inputLen, const uint8_t *key, uint8_t keyLen){    
+static size_t twofish_encrypt_ECB(const void *input, void *dest, size_t inputLen, const uint8_t *key, uint8_t keyLen){    
     //Calculate the subkeys and the key dependent S-Boxes
     TwofishContext ctx;
     twofish_init(key, keyLen, &ctx);
@@ -98,16 +98,64 @@ static size_t twofish_encrypt(const void *input, void *dest, size_t inputLen, co
     return true;
 }
 
-size_t twofish128_encrypt(const void *input, void *dest, size_t inputLen, const uint8_t key[16]){
-    return twofish_encrypt(input, dest, inputLen, key, 16);
+size_t twofish128_encrypt_ECB(const void *input, void *dest, size_t inputLen, const uint8_t key[16]){
+    return twofish_encrypt_ECB(input, dest, inputLen, key, 16);
 }
 
-size_t twofish192_encrypt(const void *input, void *dest, size_t inputLen, const uint8_t key[24]){
-    return twofish_encrypt(input, dest, inputLen, key, 24);
+size_t twofish192_encrypt_ECB(const void *input, void *dest, size_t inputLen, const uint8_t key[24]){
+    return twofish_encrypt_ECB(input, dest, inputLen, key, 24);
 }
 
-size_t twofish256_encrypt(const void *input, void *dest, size_t inputLen, const uint8_t key[32]){
-    return twofish_encrypt(input, dest, inputLen, key, 32);
+size_t twofish256_encrypt_ECB(const void *input, void *dest, size_t inputLen, const uint8_t key[32]){
+    return twofish_encrypt_ECB(input, dest, inputLen, key, 32);
+}
+
+//Returns size of encrypted bytes in dest
+static size_t twofish_encrypt_CBC(const void *input, void *dest, size_t inputLen, const uint8_t *key, uint8_t keyLen, const uint8_t initVector[16]){    
+    //Calculate the subkeys and the key dependent S-Boxes
+    TwofishContext ctx;
+    twofish_init(key, keyLen, &ctx);
+
+    uint32_t lastBlock[4];
+    memcpy(lastBlock, initVector, sizeof(lastBlock));
+
+    size_t size = 0;
+    uint32_t block[4];
+    while(inputLen != 0){
+        if(inputLen >= 16)
+            memcpy(block, &(((uint8_t *) input)[size]), sizeof(block));
+        else {
+            memcpy(block, &(((uint8_t *) input)[size]), inputLen);
+            memset(((void*) block) + inputLen, 0, 16 - inputLen); //Pad with Zeros
+        }
+
+        for(unsigned int i = 0; i < 4; i++){
+            block[i] ^= lastBlock[i];
+        }
+
+        encrypt_block(block, &ctx);
+
+        memcpy(dest, block, sizeof(block));
+        memcpy(lastBlock, block, sizeof(lastBlock));
+
+        dest += 16;
+        inputLen -= 16;
+        size += 16;
+    }
+
+    return true;
+}
+
+size_t twofish128_encrypt_CBC(const void *input, void *dest, size_t inputLen, const uint8_t key[16], const uint8_t initVector[16]){
+    return twofish_encrypt_CBC(input, dest, inputLen, key, 16, initVector);
+}
+
+size_t twofish192_encrypt_CBC(const void *input, void *dest, size_t inputLen, const uint8_t key[24], const uint8_t initVector[16]){
+    return twofish_encrypt_CBC(input, dest, inputLen, key, 24, initVector);
+}
+
+size_t twofish256_encrypt_CBC(const void *input, void *dest, size_t inputLen, const uint8_t key[32], const uint8_t initVector[16]){
+    return twofish_encrypt_CBC(input, dest, inputLen, key, 32, initVector);
 }
 
 static void decrypt_block(uint32_t block[4], const TwofishContext *ctx){
@@ -173,7 +221,7 @@ static void decrypt_block(uint32_t block[4], const TwofishContext *ctx){
 
 //Returns true if decryption was successful,
 //Returns false if inputSize is not 0 when mod 16
-static bool twofish_decrypt(const void *input, void *dest, size_t inputSize, const uint8_t *key, uint8_t keyLen){
+static bool twofish_decrypt_ECB(const void *input, void *dest, size_t inputSize, const uint8_t *key, uint8_t keyLen){
     if(inputSize % 16 != 0)
         return false;
 
@@ -195,14 +243,58 @@ static bool twofish_decrypt(const void *input, void *dest, size_t inputSize, con
     return true;
 }
 
-bool twofish128_decrypt(const void *input, void *dest, size_t inputSize, const uint8_t *key){
-    return twofish_decrypt(input, dest, inputSize, key, 16);
+bool twofish128_decrypt_ECB(const void *input, void *dest, size_t inputSize, const uint8_t *key){
+    return twofish_decrypt_ECB(input, dest, inputSize, key, 16);
 }
 
-bool twofish192_decrypt(const void *input, void *dest, size_t inputSize, const uint8_t *key){
-    return twofish_decrypt(input, dest, inputSize, key, 24);
+bool twofish192_decrypt_ECB(const void *input, void *dest, size_t inputSize, const uint8_t *key){
+    return twofish_decrypt_ECB(input, dest, inputSize, key, 24);
 }
 
-bool twofish256_decrypt(const void *input, void *dest, size_t inputSize, const uint8_t *key){
-    return twofish_decrypt(input, dest, inputSize, key, 32);
+bool twofish256_decrypt_ECB(const void *input, void *dest, size_t inputSize, const uint8_t *key){
+    return twofish_decrypt_ECB(input, dest, inputSize, key, 32);
+}
+
+//Returns true if decryption was successful,
+//Returns false if inputSize is not 0 when mod 16
+static bool twofish_decrypt_CBC(const void *input, void *dest, size_t inputSize, const uint8_t *key, uint8_t keyLen, const uint8_t initVector[16]){
+    if(inputSize % 16 != 0)
+        return false;
+
+    uint32_t lastBlock[4];
+    memcpy(lastBlock, initVector, sizeof(lastBlock));
+
+    TwofishContext ctx;
+    twofish_init(key, keyLen, &ctx);
+    uint32_t block[4];
+    while(inputSize != 0){
+        memcpy(block, input, sizeof(block));
+
+        decrypt_block(block, &ctx);
+
+        for(unsigned int i = 0; i < 4; i++){
+            block[i] ^= lastBlock[i];
+        }
+
+        memcpy(dest, block, sizeof(block));
+        memcpy(lastBlock, input, sizeof(lastBlock));
+
+        inputSize -= 16;
+        input += 16;
+        dest += 16;
+    }
+
+    return true;
+}
+
+bool twofish128_decrypt_CBC(const void *input, void *dest, size_t inputSize, const uint8_t *key, const uint8_t initVector[16]){
+    return twofish_decrypt_CBC(input, dest, inputSize, key, 16, initVector);
+}
+
+bool twofish192_decrypt_CBC(const void *input, void *dest, size_t inputSize, const uint8_t *key, const uint8_t initVector[16]){
+    return twofish_decrypt_CBC(input, dest, inputSize, key, 24, initVector);
+}
+
+bool twofish256_decrypt_CBC(const void *input, void *dest, size_t inputSize, const uint8_t *key, const uint8_t initVector[16]){
+    return twofish_decrypt_CBC(input, dest, inputSize, key, 32, initVector);
 }
