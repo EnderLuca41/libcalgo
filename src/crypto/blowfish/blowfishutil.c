@@ -5,7 +5,7 @@
 
 #include "blowfishutil.h"
 
-//First 1042 digits of pi in hexadecimal, used to initizialize in blow_init
+//First 8336 digits of pi in hexadecimal, used to initizialize in blow_init
 
 const static uint32_t SubkeysInit[18] = {
     0x243f6a88, 0x85a308d3, 0x13198a2e, 0x03707344, 0xa4093822, 0x299f31d0, 
